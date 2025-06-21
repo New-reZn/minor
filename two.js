@@ -153,7 +153,7 @@ function renderAdd(key, tagcolor, note = null) {
     let title = addpage.querySelector("#notename")
     let id = addpage.querySelector("#noteid")
     if (note != null) {
-        title.setAttribute('value', note.title)
+        title.value = note.title
         text.value = note.text
         let n = new Date(note.date)
         let nstr = n.getFullYear() + "-" + addLeadingZeros(n.getMonth() + 1) + "-" + addLeadingZeros(n.getDate()) + "T" + addLeadingZeros(n.getHours()) + ":" + addLeadingZeros(n.getMinutes())
@@ -259,31 +259,6 @@ function addtime(day, date = new Date()) {
     return date
 }
 
-function throttle(cb, delay = 1000) {
-    let shouldWait = false
-    let waitingArgs
-    const timeoutFunc = () => {
-        if (waitingArgs === null) {
-            shouldWait = false
-        } else {
-            cb(...waitingArgs)
-            waitingArgs = null
-            setTimeout(timeoutFunc, delay)
-        }
-    }
-    return (...args) => {
-        if (shouldWait) {
-            waitingArgs = args
-            return
-        }
-
-        cb(...args)
-        shouldWait = true
-
-        setTimeout(timeoutFunc, delay)
-    }
-}
-
 let sel = (key, tagColor, event) => {
     event.querySelectorAll('.sel').forEach((i) => i.classList.remove('hidden'))
     event.querySelectorAll('.unsel').forEach((i) => i.classList.add('hidden'))
@@ -365,7 +340,7 @@ window.onload = () => {
                     document.querySelector("#datetime")
                 ]
 
-                let datesarr = [0, 7, 30]
+                let datesarr = [1, 7, 30]
                 dates.forEach((i, ind) => {
                     if (ind === 3) {
                         return;
@@ -381,16 +356,25 @@ window.onload = () => {
 
                 let tagcolor = tagColor(user.tags)
 
-                let con = throttle((sub) => {
+                let con = (sub) => {
+                    console.log(sub);
+                    console.log(sub.value);
                     if (sub.value === "") {
+                        console.log("here")
                         noteRender(key, tagcolor, user.notes)
                         return
                     }
-                    let notes = user.notes.filter((x) => x.text.includes(sub.value) || x.title.includes(sub.value))
+                    console.log("here2")
+                    const term = sub.value.toLowerCase();
+                    let notes = user.notes.filter(x =>
+                    x.text?.toLowerCase().includes(term) ||
+                    x.title?.toLowerCase().includes(term)
+                    );
                     noteRender(key, tagcolor, notes)
-                }, 500)
+                }
 
                 document.querySelector("#n-search").addEventListener("input", (event) => {
+                    
                     con(event.target)
                 })
 
